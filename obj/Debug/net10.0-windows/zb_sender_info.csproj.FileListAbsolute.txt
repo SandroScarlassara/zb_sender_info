@@ -100,3 +100,4 @@ C:/A/C/zb_sender_info/obj/Debug/net10.0-windows/ref/zb_sender_info.dll
 /Users/sandroscarlassara/A/C/zb_sender_info/obj/Debug/net10.0-windows/zb_sender_info.pdb
 /Users/sandroscarlassara/A/C/zb_sender_info/obj/Debug/net10.0-windows/zb_sender_info.genruntimeconfig.cache
 /Users/sandroscarlassara/A/C/zb_sender_info/obj/Debug/net10.0-windows/ref/zb_sender_info.dll
+/Users/sandroscarlassara/A/C/zb_sender_info/obj/Debug/net10.0-windows/zb_sender_info.sourcelink.json
