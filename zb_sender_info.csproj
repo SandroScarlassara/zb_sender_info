@@ -4,6 +4,7 @@
     <TargetFramework>net10.0-windows</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+    <GenerateDependencyFile>false</GenerateDependencyFile>
     <UserSecretsId>dotnet-zb_sender_info-fc43f2ce-3ac9-4736-98a9-ecd3d6bf4569</UserSecretsId>
   </PropertyGroup>
 
@@ -11,4 +12,17 @@
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.5" />
     <PackageReference Include="Microsoft.Extensions.Hosting.WindowsServices" Version="10.0.5" />
   </ItemGroup>
+  <Target Name="MoverDllsBuild" AfterTargets="Build">
+    <ItemGroup>
+      <DllsBuild Include="$(OutDir)*.dll" Exclude="$(OutDir)$(TargetFileName)" />
+    </ItemGroup>
+    <Move SourceFiles="@(DllsBuild)" DestinationFolder="$(OutDir)dll" />
+  </Target>
+
+  <Target Name="MoverDllsPublish" AfterTargets="Publish">
+    <ItemGroup>
+      <DllsPublish Include="$(PublishDir)*.dll" Exclude="$(PublishDir)$(TargetFileName)" />
+    </ItemGroup>
+    <Move SourceFiles="@(DllsPublish)" DestinationFolder="$(PublishDir)dll" />
+  </Target>
 </Project>

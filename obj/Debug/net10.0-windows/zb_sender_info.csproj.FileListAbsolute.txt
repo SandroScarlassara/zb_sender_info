@@ -52,7 +52,6 @@ C:/A/C/zb_sender_info/obj/Debug/net10.0-windows/ref/zb_sender_info.dll
 /Users/sandroscarlassara/A/C/zb_sender_info/bin/Debug/net10.0-windows/appsettings.Development.json
 /Users/sandroscarlassara/A/C/zb_sender_info/bin/Debug/net10.0-windows/appsettings.json
 /Users/sandroscarlassara/A/C/zb_sender_info/bin/Debug/net10.0-windows/zb_sender_info
-/Users/sandroscarlassara/A/C/zb_sender_info/bin/Debug/net10.0-windows/zb_sender_info.deps.json
 /Users/sandroscarlassara/A/C/zb_sender_info/bin/Debug/net10.0-windows/zb_sender_info.runtimeconfig.json
 /Users/sandroscarlassara/A/C/zb_sender_info/bin/Debug/net10.0-windows/zb_sender_info.dll
 /Users/sandroscarlassara/A/C/zb_sender_info/bin/Debug/net10.0-windows/zb_sender_info.pdb
