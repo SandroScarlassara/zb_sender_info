@@ -1,45 +1,67 @@
 using zb_sender_info;
+using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using System.Runtime.Loader;
 
-var builder = Host.CreateDefaultBuilder(args);
-
-builder.UseWindowsService(static options =>
+internal static class Program
 {
-    // Nome do serviço exibido no Event Viewer em:
-    // Windows Logs > Application > Source = "ZabbixSenderInfo"
-    options.ServiceName = "ZabbixSenderInfo";
-});
-
-builder.ConfigureLogging(static logging =>
-{
-    // Remove providers padrão (console, debug) — desnecessários em serviço Windows
-    logging.ClearProviders();
-
-    // Direciona todos os logs para o Event Viewer do Windows
-    logging.AddEventLog(static settings =>
+    // Este método NÃO pode referenciar tipos das DLLs movidas para \dll
+    public static async Task Main(string[] args)
     {
-        // Source: identifica a origem nas colunas do Event Viewer
-        // Aparece em: Windows Logs > Application > coluna "Source"
-        settings.SourceName = "ZabbixSenderInfo";
+        AssemblyLoadContext.Default.Resolving += (ctx, nome) =>
+        {
+            var caminho = Path.Combine(AppContext.BaseDirectory, "dll", nome.Name + ".dll");
+            return File.Exists(caminho) ? ctx.LoadFromAssemblyPath(caminho) : null;
+        };
 
-        // LogName: qual log do Event Viewer receberá as entradas
-        // "Application" é o padrão — troque por "ZabbixSenderInfo" para um log dedicado
-        // (log dedicado requer criação prévia via PowerShell — veja comentário abaixo)
-        settings.LogName = "Application";
-    });
+        await Iniciar(args);
+    }
 
-    // Nível mínimo global: Information e acima (Warning, Error, Critical)
-    // Troque por LogLevel.Debug durante diagnósticos
-    logging.SetMinimumLevel(LogLevel.Information);
-});
+    // NoInlining: garante que o JIT só compile este método depois que o handler já existe
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    private static async Task Iniciar(string[] args)
+    {
+        var builder = Host.CreateDefaultBuilder(args);
 
-builder.ConfigureServices(static services =>
-{
-    services.AddHostedService<Worker>();
-});
+        builder.UseWindowsService(static options =>
+        {
+            // Nome do serviço exibido no Event Viewer em:
+            // Windows Logs > Application > Source = "ZabbixSenderInfo"
+            options.ServiceName = "ZabbixSenderInfo";
+        });
 
-await builder.Build().RunAsync();
+        builder.ConfigureLogging(static logging =>
+        {
+            // Remove providers padrão (console, debug) — desnecessários em serviço Windows
+            logging.ClearProviders();
 
+            // Direciona todos os logs para o Event Viewer do Windows
+            logging.AddEventLog(static settings =>
+            {
+                // Source: identifica a origem nas colunas do Event Viewer
+                // Aparece em: Windows Logs > Application > coluna "Source"
+                settings.SourceName = "ZabbixSenderInfo";
+
+                // LogName: qual log do Event Viewer receberá as entradas
+                // "Application" é o padrão — troque por "ZabbixSenderInfo" para um log dedicado
+                // (log dedicado requer criação prévia via PowerShell — veja comentário abaixo)
+                settings.LogName = "Application";
+            });
+
+            // Nível mínimo global: Information e acima (Warning, Error, Critical)
+            // Troque por LogLevel.Debug durante diagnósticos
+            logging.SetMinimumLevel(LogLevel.Information);
+        });
+
+        builder.ConfigureServices(static services =>
+        {
+            services.AddHostedService<Worker>();
+        });
+
+        await builder.Build().RunAsync();
+    }
+}
 public class PdhMultiCounterReader : IDisposable
 {
     private IntPtr _queryHandle = IntPtr.Zero;

@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "O+xNZYZNC3s=",
+  "dgSpecHash": "GZBfJPU2utw=",
   "success": true,
   "projectFilePath": "/Users/sandroscarlassara/A/C/zb_sender_info/zb_sender_info.csproj",
   "expectedPackageFiles": [
@@ -33,7 +33,8 @@
     "/Users/sandroscarlassara/.nuget/packages/microsoft.extensions.options.configurationextensions/10.0.5/microsoft.extensions.options.configurationextensions.10.0.5.nupkg.sha512",
     "/Users/sandroscarlassara/.nuget/packages/microsoft.extensions.primitives/10.0.5/microsoft.extensions.primitives.10.0.5.nupkg.sha512",
     "/Users/sandroscarlassara/.nuget/packages/system.diagnostics.eventlog/10.0.5/system.diagnostics.eventlog.10.0.5.nupkg.sha512",
-    "/Users/sandroscarlassara/.nuget/packages/system.serviceprocess.servicecontroller/10.0.5/system.serviceprocess.servicecontroller.10.0.5.nupkg.sha512"
+    "/Users/sandroscarlassara/.nuget/packages/system.serviceprocess.servicecontroller/10.0.5/system.serviceprocess.servicecontroller.10.0.5.nupkg.sha512",
+    "/Users/sandroscarlassara/.nuget/packages/microsoft.netcore.app.host.win-x64/10.0.7/microsoft.netcore.app.host.win-x64.10.0.7.nupkg.sha512"
   ],
   "logs": []
 }
