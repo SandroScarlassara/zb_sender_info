@@ -112,7 +112,7 @@ public class Worker : BackgroundService
 
                 var json = JsonSerializer.Serialize(new { instancias }, new JsonSerializerOptions
                 {
-                    WriteIndented    = true,
+                    WriteIndented    = false,
                     NumberHandling   = JsonNumberHandling.AllowNamedFloatingPointLiterals
                 });
 
@@ -149,8 +149,8 @@ public class Worker : BackgroundService
                         foreach (var counter in dbCountersFiltrados)
                         {
                             var resolvedKey = counter.Key
-                                .Replace("SQLINSTANCE", instance.Service, StringComparison.OrdinalIgnoreCase)
-                                .Replace("DBNAME",      dbName,           StringComparison.OrdinalIgnoreCase);
+                                .Replace("#SQLINSTANCE", instance.Service, StringComparison.OrdinalIgnoreCase)
+                                .Replace("#DBNAME",      dbName,           StringComparison.OrdinalIgnoreCase);
 
                             if (dbCounterValues.TryGetValue(resolvedKey, out var rawValue))
                                 dbMetrics.TryAdd(counter.Items, ToDouble(rawValue));
