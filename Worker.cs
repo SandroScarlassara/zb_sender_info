@@ -47,6 +47,9 @@ public class Worker : BackgroundService
             .Where(l => !string.IsNullOrWhiteSpace(l))
             .ToArray();
 
+        var server = JsonSerializer.Deserialize<ServerRoot>(
+            File.ReadAllText(instanceJson))!;
+
         var instanceConfig = JsonSerializer.Deserialize<InstanceRoot>(
             File.ReadAllText(instanceJson))!;
 
@@ -186,6 +189,11 @@ public class Worker : BackgroundService
 }
 
 // ─── Models ───────────────────────────────────────────────────────────────────
+public class ServerRoot
+{
+    [JsonPropertyName("Server")]
+    public string Name { get; set; } = "";
+}
 
 public class InstanceRoot
 {

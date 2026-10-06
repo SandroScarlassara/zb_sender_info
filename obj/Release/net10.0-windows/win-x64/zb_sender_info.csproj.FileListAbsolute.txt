@@ -1,0 +1,6 @@
+/Users/sandroscarlassara/A/C/zb_sender_info/obj/Release/net10.0-windows/win-x64/zb_sender_info.csproj.AssemblyReference.cache
+/Users/sandroscarlassara/A/C/zb_sender_info/obj/Release/net10.0-windows/win-x64/zb_sender_info.GeneratedMSBuildEditorConfig.editorconfig
+/Users/sandroscarlassara/A/C/zb_sender_info/obj/Release/net10.0-windows/win-x64/zb_sender_info.AssemblyInfoInputs.cache
+/Users/sandroscarlassara/A/C/zb_sender_info/obj/Release/net10.0-windows/win-x64/zb_sender_info.AssemblyInfo.cs
+/Users/sandroscarlassara/A/C/zb_sender_info/obj/Release/net10.0-windows/win-x64/zb_sender_info.csproj.CoreCompileInputs.cache
+/Users/sandroscarlassara/A/C/zb_sender_info/obj/Release/net10.0-windows/win-x64/zb_sender_info.sourcelink.json

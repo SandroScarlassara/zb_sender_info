@@ -29,8 +29,6 @@ internal static class Program
             // Nome do serviço exibido no Event Viewer em:
             // Windows Logs > Application > Source = "ZabbixSenderInfo"
             options.ServiceName = "ZabbixSenderInfo";
-            options.displayName = "Zabbix Sender Informo";
-            options.description = "Envia métricas de instâncias SQL Server para o Zabbix";  
         });
 
         builder.ConfigureLogging(static logging =>
@@ -58,6 +56,7 @@ internal static class Program
 
         builder.ConfigureServices(static services =>
         {
+            
             services.AddHostedService<Worker>();
         });
 
