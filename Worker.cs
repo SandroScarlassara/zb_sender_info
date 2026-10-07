@@ -63,6 +63,8 @@ public class Worker : BackgroundService
         var dbCounterConfig = JsonSerializer.Deserialize<DbCounterRoot>(
             File.ReadAllText(DtbCounterJson))!;
 
+        var serverName = $"\"{server.Name}\" consulta.instance.raw ";
+
         var insCountersPorInstancia = instanceConfig.Instances
             .ToDictionary(
                 inst => inst.Service,
@@ -118,6 +120,8 @@ public class Worker : BackgroundService
                     WriteIndented    = false,
                     NumberHandling   = JsonNumberHandling.AllowNamedFloatingPointLiterals
                 });
+                
+                await File.WriteAllTextAsync(outputDtbJson, serverName , stoppingToken);
 
                 await File.WriteAllTextAsync(outputInstanceJson, json, stoppingToken);
                 _logger.LogInformation("instance_online.json atualizado com sucesso");
@@ -191,10 +195,16 @@ public class Worker : BackgroundService
 // ─── Models ───────────────────────────────────────────────────────────────────
 public class ServerRoot
 {
+    internal readonly object Name;
+
     [JsonPropertyName("Server")]
+    public List<ServerJson> Servers { get; set; } = new();
+}
+public class ServerJson
+{
+    [JsonPropertyName("name")]
     public string Name { get; set; } = "";
 }
-
 public class InstanceRoot
 {
     [JsonPropertyName("Instance")]
