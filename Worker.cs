@@ -24,18 +24,19 @@ public class Worker : BackgroundService
     private readonly ILogger<Worker> _logger;
     private readonly ILoggerFactory _loggerFactory;
 
-    private readonly string DtbCounterJson      = @"C:\Program Files\Zabbix Agent\conf\database_counter.json";
-    private readonly string DtbCounterTxt       = @"C:\Program Files\Zabbix Agent\conf\database_counter.txt";
-    private readonly string outputDtbJson       = @"C:\Program Files\Zabbix Agent\conf\Database_online.json";
-    private readonly string instanceJson        = @"C:\Program Files\Zabbix Agent\conf\instance.json";
-    private readonly string InstanceCounterJson = @"C:\Program Files\Zabbix Agent\conf\instance_counter.json";
-    private readonly string InstanceCounterTxt  = @"C:\Program Files\Zabbix Agent\conf\instance_counter.txt";
-    private readonly string outputInstanceJson  = @"C:\Program Files\Zabbix Agent\conf\instance_online.json";
+    static readonly string baseDir           = @"C:\Program Files\Zabbix Agent\conf";
+    private readonly string DtbCounterJson      = baseDir + @"\database_counter.json";
+    private readonly string DtbCounterTxt       = baseDir + @"\database_counter.txt";
+    private readonly string outputDtbJson       = baseDir + @"\Database_online.json";
+    private readonly string instanceJson        = baseDir + @"\instance.json";
+    private readonly string InstanceCounterJson = baseDir + @"\instance_counter.json";
+    private readonly string InstanceCounterTxt  = baseDir + @"\instance_counter.txt";
+    private readonly string outputInstanceJson  = baseDir + @"\instance_online.json";
+    private readonly string ServerJson          = baseDir + @"\Server.json";
 
     // que não é registrado no container de DI (instanciado manualmente)
     public Worker(ILogger<Worker> logger, ILoggerFactory loggerFactory)
-    {
-        _logger        = logger;
+    {        _logger        = logger;
         _loggerFactory = loggerFactory;
     }
 
@@ -48,7 +49,7 @@ public class Worker : BackgroundService
             .ToArray();
 
         var server = JsonSerializer.Deserialize<ServerRoot>(
-            File.ReadAllText(instanceJson))!;
+            File.ReadAllText(ServerJson))!;
 
         var instanceConfig = JsonSerializer.Deserialize<InstanceRoot>(
             File.ReadAllText(instanceJson))!;
@@ -63,7 +64,8 @@ public class Worker : BackgroundService
         var dbCounterConfig = JsonSerializer.Deserialize<DbCounterRoot>(
             File.ReadAllText(DtbCounterJson))!;
 
-        var serverName = $"\"{server.Name}\" consulta.instance.raw ";
+        var serverName = server.Servers.FirstOrDefault()?.ServerName ?? "UnknownServer" + " consulta.databases.raw ";
+        var timeUpdate = server.Servers.FirstOrDefault()?.TimeUpdate ?? 0;
 
         var insCountersPorInstancia = instanceConfig.Instances
             .ToDictionary(
@@ -187,23 +189,25 @@ public class Worker : BackgroundService
                 _logger.LogError(ex, "Erro no processamento");
             }
 
-            await Task.Delay(60000, stoppingToken);
+            await Task.Delay(timeUpdate*1000, stoppingToken);
         }
     }
 }
 
 // ─── Models ───────────────────────────────────────────────────────────────────
+
 public class ServerRoot
 {
-    internal readonly object Name;
-
     [JsonPropertyName("Server")]
     public List<ServerJson> Servers { get; set; } = new();
 }
 public class ServerJson
 {
-    [JsonPropertyName("name")]
-    public string Name { get; set; } = "";
+    [JsonPropertyName("ServerName")]
+    public string ServerName { get; set; } = "";
+
+    [JsonPropertyName("TimeUpdate")]
+    public int   TimeUpdate { get; set; } = 0;
 }
 public class InstanceRoot
 {
