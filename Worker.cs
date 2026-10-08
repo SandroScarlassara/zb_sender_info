@@ -67,6 +67,7 @@ public class Worker : BackgroundService
         var serverName = server.Servers.FirstOrDefault()?.ServerName ?? "UnknownServer" + " consulta.databases.raw ";
         var timeUpdate = server.Servers.FirstOrDefault()?.TimeUpdate ?? 0;
 
+        Console.WriteLine($"ServerName: {serverName}");
         var insCountersPorInstancia = instanceConfig.Instances
             .ToDictionary(
                 inst => inst.Service,
