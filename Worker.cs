@@ -64,7 +64,9 @@ public class Worker : BackgroundService
         var dbCounterConfig = JsonSerializer.Deserialize<DbCounterRoot>(
             File.ReadAllText(DtbCounterJson))!;
 
-        var serverName = server.Servers.FirstOrDefault()?.ServerName ?? "UnknownServer" + " consulta.databases.raw ";
+        var serverName = server.Servers.FirstOrDefault()?.ServerName ?? "UnknownServer";
+        serverName = $"\"{serverName}\" consulta.databases.raw ";
+
         var timeUpdate = server.Servers.FirstOrDefault()?.TimeUpdate ?? 0;
 
         Console.WriteLine($"ServerName: {serverName}");
@@ -124,9 +126,7 @@ public class Worker : BackgroundService
                     NumberHandling   = JsonNumberHandling.AllowNamedFloatingPointLiterals
                 });
                 
-                await File.WriteAllTextAsync(outputDtbJson, serverName , stoppingToken);
-
-                await File.WriteAllTextAsync(outputInstanceJson, json, stoppingToken);
+                await File.WriteAllTextAsync(outputInstanceJson, serverName + json, stoppingToken);
                 _logger.LogInformation("instance_online.json atualizado com sucesso");
 
                 // ── Contadores de database ────────────────────────────────────────────────
@@ -182,7 +182,7 @@ public class Worker : BackgroundService
                     NumberHandling = JsonNumberHandling.AllowNamedFloatingPointLiterals
                 });
 
-                await File.WriteAllTextAsync(outputDtbJson, dbJson, stoppingToken);
+                await File.WriteAllTextAsync(outputDtbJson, serverName + dbJson, stoppingToken);
                 _logger.LogInformation("database_online.json atualizado com sucesso");
             }
             catch (Exception ex)
