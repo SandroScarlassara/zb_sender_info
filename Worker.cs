@@ -264,11 +264,9 @@ public class Worker : BackgroundService
             await EnviarZabbixAsync(zabbixSenderExe, zabbixIpServer, outputDtbJson, stoppingToken);
 
             await Task.Delay(timeUpdate*1000, stoppingToken);
-
         }
     }
 }
-
 // ─── Models ───────────────────────────────────────────────────────────────────
 
 public class ServerRoot
