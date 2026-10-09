@@ -21,6 +21,73 @@ public class Worker : BackgroundService
         };
         return double.IsFinite(value) ? value : 0d;
     }
+
+    private async Task EnviarZabbixAsync(string exe, string ipServer, string arquivo, CancellationToken ct)
+    {
+        if (string.IsNullOrWhiteSpace(exe) || string.IsNullOrWhiteSpace(ipServer))
+        {
+            _logger.LogWarning("ZabbixSenderExe ou ZabbixIpServer não configurado no Server.json");
+            return;
+        }
+
+        try
+        {
+            var psi = new System.Diagnostics.ProcessStartInfo
+            {
+                FileName               = exe,
+                UseShellExecute        = false,
+                CreateNoWindow         = true,
+                RedirectStandardOutput = true,
+                RedirectStandardError  = true
+            };
+
+            // ArgumentList cuida das aspas e espaços nos caminhos
+            psi.ArgumentList.Add("-z");
+            psi.ArgumentList.Add(ipServer);
+            psi.ArgumentList.Add("-i");
+            psi.ArgumentList.Add(arquivo);
+
+            using var proc = System.Diagnostics.Process.Start(psi)
+                ?? throw new InvalidOperationException("Não foi possível iniciar o zabbix_sender");
+
+            // Timeout de 30s para o sender nunca travar o ciclo
+            using var cts = CancellationTokenSource.CreateLinkedTokenSource(ct);
+            cts.CancelAfter(TimeSpan.FromSeconds(30));
+
+            var stdoutTask = proc.StandardOutput.ReadToEndAsync(cts.Token);
+            var stderrTask = proc.StandardError.ReadToEndAsync(cts.Token);
+
+            try
+            {
+                await proc.WaitForExitAsync(cts.Token);
+            }
+            catch (OperationCanceledException) when (!ct.IsCancellationRequested)
+            {
+                try { proc.Kill(entireProcessTree: true); } catch { }
+                _logger.LogWarning("zabbix_sender excedeu 30s e foi encerrado. Arquivo: {Arquivo}", arquivo);
+                return;
+            }
+
+            var stdout = await stdoutTask;
+            var stderr = await stderrTask;
+
+            if (proc.ExitCode == 0)
+                _logger.LogInformation("zabbix_sender OK ({Arquivo}): {Saida}", Path.GetFileName(arquivo), stdout.Trim());
+            else
+                _logger.LogWarning("zabbix_sender código {Codigo} ({Arquivo}). Saída: {Saida} Erro: {Erro}",
+                    proc.ExitCode, Path.GetFileName(arquivo), stdout.Trim(), stderr.Trim());
+        }
+        catch (OperationCanceledException) when (ct.IsCancellationRequested)
+        {
+            // serviço sendo parado, ignora
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Erro ao executar o zabbix_sender");
+        }
+    }
+
+
     private readonly ILogger<Worker> _logger;
     private readonly ILoggerFactory _loggerFactory;
 
@@ -36,7 +103,7 @@ public class Worker : BackgroundService
 
     // que não é registrado no container de DI (instanciado manualmente)
     public Worker(ILogger<Worker> logger, ILoggerFactory loggerFactory)
-    {        _logger        = logger;
+    {   _logger        = logger;
         _loggerFactory = loggerFactory;
     }
 
@@ -47,9 +114,6 @@ public class Worker : BackgroundService
         var counters = File.ReadAllLines(InstanceCounterTxt)
             .Where(l => !string.IsNullOrWhiteSpace(l))
             .ToArray();
-
-        var server = JsonSerializer.Deserialize<ServerRoot>(
-            File.ReadAllText(ServerJson))!;
 
         var instanceConfig = JsonSerializer.Deserialize<InstanceRoot>(
             File.ReadAllText(instanceJson))!;
@@ -64,12 +128,15 @@ public class Worker : BackgroundService
         var dbCounterConfig = JsonSerializer.Deserialize<DbCounterRoot>(
             File.ReadAllText(DtbCounterJson))!;
 
+        var server = JsonSerializer.Deserialize<ServerRoot>(
+            File.ReadAllText(ServerJson))!;
+
         var serverName = server.Servers.FirstOrDefault()?.ServerName ?? "UnknownServer";
-        serverName = $"\"{serverName}\" consulta.databases.raw ";
 
         var timeUpdate = server.Servers.FirstOrDefault()?.TimeUpdate ?? 0;
+        var zabbixSenderExe = server.Servers.FirstOrDefault()?.ZabbixSenderExe ?? "";
+        var zabbixIpServer  = server.Servers.FirstOrDefault()?.ZabbixIpServer ?? "";
 
-        Console.WriteLine($"ServerName: {serverName}");
         var insCountersPorInstancia = instanceConfig.Instances
             .ToDictionary(
                 inst => inst.Service,
@@ -125,8 +192,9 @@ public class Worker : BackgroundService
                     WriteIndented    = false,
                     NumberHandling   = JsonNumberHandling.AllowNamedFloatingPointLiterals
                 });
+                var instanceRaw = $"\"{serverName}\" consulta.instances.raw ";
                 
-                await File.WriteAllTextAsync(outputInstanceJson, serverName + json, stoppingToken);
+                await File.WriteAllTextAsync(outputInstanceJson, instanceRaw + json, stoppingToken);
                 _logger.LogInformation("instance_online.json atualizado com sucesso");
 
                 // ── Contadores de database ────────────────────────────────────────────────
@@ -182,7 +250,9 @@ public class Worker : BackgroundService
                     NumberHandling = JsonNumberHandling.AllowNamedFloatingPointLiterals
                 });
 
-                await File.WriteAllTextAsync(outputDtbJson, serverName + dbJson, stoppingToken);
+                var databasesRaw = $"\"{serverName}\" consulta.databases.raw ";
+
+                await File.WriteAllTextAsync(outputDtbJson, databasesRaw + dbJson, stoppingToken);
                 _logger.LogInformation("database_online.json atualizado com sucesso");
             }
             catch (Exception ex)
@@ -190,7 +260,11 @@ public class Worker : BackgroundService
                 _logger.LogError(ex, "Erro no processamento");
             }
 
+            await EnviarZabbixAsync(zabbixSenderExe, zabbixIpServer, outputInstanceJson, stoppingToken);
+            await EnviarZabbixAsync(zabbixSenderExe, zabbixIpServer, outputDtbJson, stoppingToken);
+
             await Task.Delay(timeUpdate*1000, stoppingToken);
+
         }
     }
 }
@@ -209,6 +283,12 @@ public class ServerJson
 
     [JsonPropertyName("TimeUpdate")]
     public int   TimeUpdate { get; set; } = 0;
+
+    [JsonPropertyName("ZabbixSenderExe")]
+    public string ZabbixSenderExe { get; set; } = "";
+
+    [JsonPropertyName("ZabbixIpServer")]
+    public string ZabbixIpServer { get; set; } = "";
 }
 public class InstanceRoot
 {
