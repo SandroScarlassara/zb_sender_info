@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("zb_sender_info")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+c4eef39b6c6ec938675980f752744e7ef9ad159a")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+c9cf5528eb998ff6978ec545a7cc9b1853467d26")]
 [assembly: System.Reflection.AssemblyProductAttribute("zb_sender_info")]
 [assembly: System.Reflection.AssemblyTitleAttribute("zb_sender_info")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
