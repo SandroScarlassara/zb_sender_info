@@ -192,7 +192,7 @@ public class Worker : BackgroundService
                     WriteIndented    = false,
                     NumberHandling   = JsonNumberHandling.AllowNamedFloatingPointLiterals
                 });
-                var instanceRaw = $"\"{serverName}\" consulta.instances.raw ";
+                var instanceRaw = $"\"{serverName}\" consulta.instancias.raw ";
                 
                 await File.WriteAllTextAsync(outputInstanceJson, instanceRaw + json, stoppingToken);
                 _logger.LogInformation("instance_online.json atualizado com sucesso");
