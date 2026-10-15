@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("zb_sender_info")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Release")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+f1a1dc498acd9ea1709fb53a5837e6a88c0c73c7")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+f3dec9f114eeeb3d9b3c8ecab068a5cf2ab4ea1f")]
 [assembly: System.Reflection.AssemblyProductAttribute("zb_sender_info")]
 [assembly: System.Reflection.AssemblyTitleAttribute("zb_sender_info")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
